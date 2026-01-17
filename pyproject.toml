@@ -1,0 +1,15 @@
+[project]
+name = "rinha24"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "starlette>=0.51.0",
+    "uvicorn>=0.40.0",
+]
+    
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

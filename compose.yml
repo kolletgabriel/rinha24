@@ -1,0 +1,55 @@
+services:
+
+  api1: &api
+    build: .
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+        read_only: true
+    depends_on:
+      - db
+    expose:
+      - "8000"
+    command: ["uvicorn", "--reload", "rinha24.main:app"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '170MB'
+
+  api2:
+    <<: *api
+
+  db:
+    image: postgres:18.1-trixie
+    environment:
+      POSTGRES_PASSWORD: rinha
+    volumes:
+      - type: bind
+        source: ./init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '200MB'
+
+  lb:
+    image: nginx:1.29-trixie
+    volumes:
+      - type: bind
+        source: ./nginx.conf
+        target: /etc/nginx/nginx.conf
+    depends_on:
+      - api1
+      - api2
+    ports:
+      - "9999:9999"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: '10MB'
