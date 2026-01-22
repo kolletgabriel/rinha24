@@ -4,7 +4,6 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "asyncpg>=0.31.0",
-    "hypothesis>=6.150.2",
     "pydantic>=2.12.5",
     "starlette>=0.51.0",
     "uvicorn>=0.40.0",
@@ -16,5 +15,6 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.150.2",
     "pytest>=9.0.2",
 ]
