@@ -4,8 +4,8 @@ services:
     build: .
     volumes:
       - type: bind
-        source: ./src
-        target: /app/src
+        source: ./src/rinha24
+        target: /app/rinha24
         read_only: true
     depends_on:
       - db
