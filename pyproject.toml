@@ -15,6 +15,12 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "hypothesis>=6.150.2",
     "pytest>=9.0.2",
+    "testcontainers[postgres]>=4.14.0",
+]
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:^The @wait_container_is_ready decorator:DeprecationWarning"
 ]
