@@ -36,7 +36,7 @@ def create_app() -> Starlette:
                 Route(
                     '/customers/{id:int}/statement',
                     endpoint=statement,
-                    methods=['POST']
+                    methods=['GET']
                 )
             ],
             lifespan=lifespan
