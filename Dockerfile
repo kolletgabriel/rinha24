@@ -21,7 +21,8 @@ ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UVICORN_HOST="0.0.0.0" \
-    FORWARDED_ALLOW_IPS="*"
+    FORWARDED_ALLOW_IPS="*" \
+    DB_URL="postgres://postgres:rinha@db:5432/postgres"
 
 WORKDIR /app
 
