@@ -36,5 +36,15 @@ async def transaction(request: Request[State]) -> Response:
             return Response('', status_code=422)
 
 
-def statement(request: Request) -> JSONResponse:
-    ...
+async def statement(request: Request[State]) -> Response:
+    customer_id = request.path_params['id']
+    pool = request.state.pool
+    async with pool.acquire() as conn:
+        try:
+            result = await conn.fetchrow(
+                'CALL get_statement($1, NULL, NULL);',
+                customer_id
+            )
+            return JSONResponse(dict(result))
+        except NoDataFoundError:
+            return Response('', status_code=404)

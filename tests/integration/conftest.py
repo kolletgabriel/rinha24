@@ -40,7 +40,8 @@ async def db_pool(anyio_backend, db_url, init_sql):
 
     async with pool.acquire() as conn:
         await conn.execute('''DROP TABLE customers, transactions CASCADE;
-                              DROP PROCEDURE do_transaction;''')
+                              DROP PROCEDURE do_transaction;
+                              DROP PROCEDURE get_statement;''')
 
 
 @fixture(scope='package')
