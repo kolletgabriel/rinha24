@@ -53,7 +53,7 @@ BEGIN
         VALUES (p_id, DEFAULT, p_type, p_val, p_desc);
 
         RETURN;
-    ELSIF abs(curr_balance - p_val) > curr_overdraft_limit THEN
+    ELSIF (curr_balance - p_val) < (curr_overdraft_limit * (-1)) THEN
         RAISE EXCEPTION integrity_constraint_violation;
     ELSE
         UPDATE customers AS c
