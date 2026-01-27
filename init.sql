@@ -4,6 +4,7 @@ CREATE TABLE customers (
     overdraft_limit INT
 );
 
+
 CREATE TABLE transactions (
     customer_id INT REFERENCES customers,
     ts TIMESTAMPTZ DEFAULT NOW(),
@@ -13,12 +14,14 @@ CREATE TABLE transactions (
     PRIMARY KEY (customer_id, ts)
 );
 
+
 INSERT INTO customers (overdraft_limit) VALUES
     (1000 * 100),
     (800 * 100),
     (10000 * 100),
     (100000 * 100),
     (5000 * 100);
+
 
 CREATE PROCEDURE do_transaction(
     p_id INT,
@@ -62,5 +65,40 @@ BEGIN
         INSERT INTO transactions
         VALUES (p_id, DEFAULT, p_type, p_val, p_desc);
     END IF;
+END;
+$$;
+
+
+CREATE PROCEDURE get_statement(
+    p_id INT,
+    OUT balance JSON,
+    OUT recent_transactions JSON
+) LANGUAGE plpgsql AS $$
+BEGIN
+    SELECT json_build_object(
+        'total', c.balance,
+        'stmt_date', now(),
+        'overdraft_limit', c.overdraft_limit
+    )
+    INTO balance
+    FROM customers c
+    WHERE c.id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION no_data_found;
+    END IF;
+
+    SELECT json_agg(to_json(t))
+    INTO recent_transactions
+    FROM (
+        SELECT value
+            ,type
+            ,description
+            ,ts
+        FROM transactions
+        WHERE customer_id = p_id
+        ORDER BY ts DESC
+        LIMIT 10
+    ) AS t;
 END;
 $$;
