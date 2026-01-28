@@ -19,10 +19,10 @@ class State(TypedDict):
 async def lifespan(_: Starlette) -> AsyncIterator[State]:
     async def init_conn(conn: Connection):
         await conn.set_type_codec(  # autoconvert `JSON` -> `dict`
-                'json',
-                encoder=json.dumps,
-                decoder=json.loads,
-                schema='pg_catalog'
+            'json',
+            encoder=json.dumps,
+            decoder=json.loads,
+            schema='pg_catalog'
         )
 
     cfg = Config()
@@ -36,17 +36,17 @@ async def lifespan(_: Starlette) -> AsyncIterator[State]:
 
 def create_app() -> Starlette:
     return Starlette(
-            routes=[
-                Route(
-                    '/customers/{id:int}/transaction',
-                    endpoint=transaction,
-                    methods=['POST']
-                ),
-                Route(
-                    '/customers/{id:int}/statement',
-                    endpoint=statement,
-                    methods=['GET']
-                )
-            ],
-            lifespan=lifespan
+        routes=[
+            Route(
+                '/customers/{id:int}/transaction',
+                endpoint=transaction,
+                methods=['POST']
+            ),
+            Route(
+                '/customers/{id:int}/statement',
+                endpoint=statement,
+                methods=['GET']
+            )
+        ],
+        lifespan=lifespan
     )
