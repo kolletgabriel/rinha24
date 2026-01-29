@@ -9,6 +9,11 @@ from pytest import mark
 pytestmark = mark.anyio
 
 
+async def test_404(db_pool, client):
+    res = await client.get('/customers/6/statement')
+    assert res.status_code == 404
+
+
 async def test_is_empty(db_pool, client):
     res = await client.get('/customers/1/statement')
     assert res.status_code == 200

@@ -8,6 +8,13 @@ from pytest import mark
 pytestmark = mark.anyio
 
 
+async def test_404(db_pool, client):
+    req_body = {'value': 1000, 'type': 'c', 'desc': 'desc'}
+
+    res = await client.post('/customers/6/transaction', json=req_body)
+    assert res.status_code == 404
+
+
 async def test_credit_success(db_pool, client):
     req_body = {'value': 1000, 'type': 'c', 'desc': 'desc'}
 
