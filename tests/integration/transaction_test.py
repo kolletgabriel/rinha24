@@ -1,82 +1,95 @@
-import pytest
+import asyncio
+
+from ..utils import Queries
+
+from pytest import mark
 
 
-SELECT_BALANCE = 'SELECT balance FROM customers WHERE id = 1;'
-SELECT_OVERDRAFT = 'SELECT overdraft_limit FROM customers WHERE id = 1;'
-SELECT_TRANSACTION = 'SELECT * FROM transactions WHERE customer_id = 1;'
+pytestmark = mark.anyio
 
 
-@pytest.mark.anyio
 async def test_credit_success(db_pool, client):
-    async with db_pool.acquire() as conn:
-        tr_val = 1000
+    req_body = {'value': 1000, 'type': 'c', 'desc': 'desc'}
 
-        balance_before = await conn.fetchval(SELECT_BALANCE)
-        res = client.post('/customers/1/transaction', json={
-            'value': tr_val, 'type': 'c', 'desc': 'desc'
-        })
-        assert res.status_code == 200
-        assert res.json()['balance'] == (balance_before + tr_val)
+    balance_before = await db_pool.fetchval(Queries.BALANCE)
+    overdraft_limit = await db_pool.fetchval(Queries.OVERDRAFT)
 
-        balance_after = await conn.fetchval(SELECT_BALANCE)
-        assert balance_after == (balance_before + tr_val)
+    res = await client.post('/customers/1/transaction', json=req_body)
+    assert res.status_code == 200
 
-        new_transaction = await conn.fetchrow(SELECT_TRANSACTION)
-        assert new_transaction['value'] == tr_val
-        assert new_transaction['type'] == 'c'
+    res_body = res.json()
+    assert {'balance', 'overdraft_limit'}.issubset(res_body)
+    assert res_body['balance'] == (balance_before + req_body['value'])
+    assert res_body['overdraft_limit'] == overdraft_limit
+
+    balance_after = await db_pool.fetchval(Queries.BALANCE)
+    assert balance_after == res_body['balance']
+
+    new_transaction = await db_pool.fetchrow(Queries.TRANSACTION)
+    assert new_transaction is not None
+    assert new_transaction['value'] == req_body['value']
+    assert new_transaction['type'] == req_body['type']
+    assert new_transaction['description'] == req_body['desc']
 
 
-@pytest.mark.anyio
 async def test_credit_failure(db_pool, client):
-    async with db_pool.acquire() as conn:
-        tr_value = -1000
+    req_body = {'value': -1000, 'type': 'c', 'desc': 'desc'}
 
-        balance_before = await conn.fetchval(SELECT_BALANCE)
-        res = client.post('/customers/1/transaction', json={
-            'value': tr_value, 'type': 'c', 'desc': 'desc'
-        })
-        assert res.status_code == 422
+    balance_before = await db_pool.fetchval(Queries.BALANCE)
 
-        balance_after = await conn.fetchval(SELECT_BALANCE)
-        assert balance_after == balance_before
+    res = await client.post('/customers/1/transaction', json=req_body)
+    assert res.status_code == 422
 
-        new_transaction = await conn.fetchrow(SELECT_TRANSACTION)
-        assert new_transaction is None
+    balance_after = await db_pool.fetchval(Queries.BALANCE)
+    assert balance_after == balance_before
+
+    new_transaction = await db_pool.fetchrow(Queries.TRANSACTION)
+    assert new_transaction is None
 
 
-@pytest.mark.anyio
 async def test_debit_success(db_pool, client):
-    async with db_pool.acquire() as conn:
-        tr_value = await conn.fetchval(SELECT_OVERDRAFT)  # within the limit
+    req_body = {
+        'value': await db_pool.fetchval(Queries.OVERDRAFT),  # within the limit
+        'type': 'd',
+        'desc': 'desc'
+    }
 
-        balance_before = await conn.fetchval(SELECT_BALANCE)
-        res = client.post('/customers/1/transaction', json={
-            'value': tr_value, 'type': 'd', 'desc': 'desc'
-        })
-        assert res.status_code == 200
-        assert res.json()['balance'] == (balance_before - tr_value)
+    balance_before = await db_pool.fetchval(Queries.BALANCE)
+    overdraft_limit = req_body['value']
 
-        balance_after = await conn.fetchval(SELECT_BALANCE)
-        assert balance_after == (balance_before - tr_value)
+    res = await client.post('/customers/1/transaction', json=req_body)
+    assert res.status_code == 200
 
-        new_transaction = await conn.fetchrow(SELECT_TRANSACTION)
-        assert new_transaction['value'] == tr_value
-        assert new_transaction['type'] == 'd'
+    res_body = res.json()
+    assert {'balance', 'overdraft_limit'}.issubset(res_body)
+    assert res_body['balance'] == (balance_before - req_body['value'])
+    assert res_body['overdraft_limit'] == overdraft_limit
+
+    balance_after = await db_pool.fetchval(Queries.BALANCE)
+    assert balance_after == res_body['balance']
+
+    new_transaction = await db_pool.fetchrow(Queries.TRANSACTION)
+    assert new_transaction is not None
+    assert new_transaction['value'] == req_body['value']
+    assert new_transaction['type'] == req_body['type']
+    assert new_transaction['description'] == req_body['desc']
 
 
-@pytest.mark.anyio
 async def test_debit_failure(db_pool, client):
-    async with db_pool.acquire() as conn:
-        tr_value = (await conn.fetchval(SELECT_OVERDRAFT)) + 1  # past the limit
+    req_body = {
+        'value': await db_pool.fetchval(Queries.OVERDRAFT) + 1,  # past the limit
+        'type': 'd',
+        'desc': 'desc'
+    }
 
-        balance_before = await conn.fetchval(SELECT_BALANCE)
-        res = client.post('/customers/1/transaction', json={
-            'value': tr_value, 'type': 'd', 'desc': 'desc'
-        })
-        assert res.status_code == 422
+    balance_before = await db_pool.fetchval(Queries.BALANCE)
+    overdraft_limit = req_body['value']
 
-        balance_after = await conn.fetchval(SELECT_BALANCE)
-        assert balance_before == balance_after
+    res = await client.post('/customers/1/transaction', json=req_body)
+    assert res.status_code == 422
 
-        new_transaction = await conn.fetchrow(SELECT_TRANSACTION)
-        assert new_transaction is None
+    balance_after = await db_pool.fetchval(Queries.BALANCE)
+    assert balance_after == balance_before
+
+    new_transaction = await db_pool.fetchrow(Queries.TRANSACTION)
+    assert new_transaction is None

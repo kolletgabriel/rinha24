@@ -2,8 +2,10 @@ from rinha24.app import create_app
 
 from pathlib import Path
 
-from pytest import fixture
+from asgi_lifespan import LifespanManager
 from asyncpg import create_pool
+from httpx import AsyncClient, ASGITransport
+from pytest import fixture
 from starlette.config import environ
 from starlette.testclient import TestClient
 from testcontainers.postgres import PostgresContainer
@@ -44,7 +46,11 @@ async def db_pool(anyio_backend, db_url, init_sql):
                               DROP PROCEDURE get_statement;''')
 
 
-@fixture(scope='package')
-def client(db_url):
-    with TestClient(app=create_app()) as tc:
-        yield tc
+@fixture(scope='module')
+async def client(anyio_backend, db_url):
+    async with LifespanManager(app=create_app()) as manager:
+        async with AsyncClient(
+            transport=ASGITransport(manager.app),
+            base_url='http://test'
+        ) as ac:
+            yield ac

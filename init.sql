@@ -6,12 +6,12 @@ CREATE TABLE customers (
 
 
 CREATE TABLE transactions (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     customer_id INT REFERENCES customers,
     ts TIMESTAMPTZ DEFAULT NOW(),
     type CHAR NOT NULL,
     value BIGINT NOT NULL,
-    description VARCHAR NOT NULL,
-    PRIMARY KEY (customer_id, ts)
+    description VARCHAR NOT NULL
 );
 
 
@@ -50,7 +50,7 @@ BEGIN
         INTO overdraft_limit, balance;
 
         INSERT INTO transactions
-        VALUES (p_id, DEFAULT, p_type, p_val, p_desc);
+        VALUES (DEFAULT, p_id, DEFAULT, p_type, p_val, p_desc);
 
         RETURN;
     ELSIF (curr_balance - p_val) < (curr_overdraft_limit * (-1)) THEN
@@ -63,7 +63,7 @@ BEGIN
         INTO overdraft_limit, balance;
 
         INSERT INTO transactions
-        VALUES (p_id, DEFAULT, p_type, p_val, p_desc);
+        VALUES (DEFAULT, p_id, DEFAULT, p_type, p_val, p_desc);
     END IF;
 END;
 $$;
@@ -97,7 +97,7 @@ BEGIN
             ,ts
         FROM transactions
         WHERE customer_id = p_id
-        ORDER BY ts DESC
+        ORDER BY id DESC
         LIMIT 10
     ) AS t;
 END;
