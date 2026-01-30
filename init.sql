@@ -11,7 +11,7 @@ CREATE TABLE transactions (
     ts TIMESTAMPTZ DEFAULT NOW(),
     type CHAR NOT NULL,
     value BIGINT NOT NULL,
-    description VARCHAR NOT NULL
+    "desc" VARCHAR NOT NULL
 );
 
 
@@ -94,7 +94,7 @@ BEGIN
     FROM (
         SELECT value
             ,type
-            ,description
+            ,"desc"
             ,ts
         FROM transactions
         WHERE customer_id = p_id

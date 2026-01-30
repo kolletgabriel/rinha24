@@ -5,7 +5,7 @@ class Queries:
 
     TRANSACTION = 'SELECT * FROM transactions WHERE customer_id = 1;'
 
-    TRANSACTIONS = '''SELECT value, type, description, ts
+    TRANSACTIONS = '''SELECT value, type, "desc", ts
                       FROM transactions
                       WHERE customer_id = 1
                       ORDER BY id DESC;'''
