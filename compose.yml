@@ -11,7 +11,7 @@ services:
       - db
     expose:
       - "8000"
-    command: ["uvicorn", "--reload", "rinha24.main:app"]
+    command: ["uvicorn", "rinha24.main:app"]
     deploy:
       resources:
         limits:
