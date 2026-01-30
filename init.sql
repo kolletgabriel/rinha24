@@ -38,7 +38,8 @@ BEGIN
     SELECT c.balance, c.overdraft_limit
     INTO curr_balance, curr_overdraft_limit
     FROM customers AS c
-    WHERE id = p_id;
+    WHERE id = p_id
+    FOR UPDATE;
 
     IF NOT FOUND THEN
         RAISE EXCEPTION no_data_found;
