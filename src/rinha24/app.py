@@ -17,6 +17,9 @@ class State(TypedDict):
 
 @asynccontextmanager
 async def lifespan(_: Starlette) -> AsyncIterator[State]:
+    cfg = Config()
+    DB_URL = cfg('DB_URL')
+
     async def init_conn(conn: Connection):
         await conn.set_type_codec(  # autoconvert `JSON` -> `dict`
             'json',
@@ -25,13 +28,8 @@ async def lifespan(_: Starlette) -> AsyncIterator[State]:
             schema='pg_catalog'
         )
 
-    cfg = Config()
-    DB_URL = cfg('DB_URL')
-    pool = await create_pool(DB_URL, init=init_conn)
-
-    yield { 'pool': pool }
-
-    await pool.close()
+    async with create_pool(DB_URL, init=init_conn) as pool:
+        yield { 'pool': pool }
 
 
 def create_app() -> Starlette:

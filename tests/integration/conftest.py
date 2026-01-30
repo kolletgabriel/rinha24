@@ -33,15 +33,12 @@ def init_sql():
 
 @fixture
 async def db_pool(anyio_backend, db_url, init_sql):
-    pool = await create_pool(db_url)
+    async with create_pool(db_url) as pool:
+        await pool.execute(init_sql)
 
-    async with pool.acquire() as conn:
-        await conn.execute(init_sql)
+        yield pool
 
-    yield pool
-
-    async with pool.acquire() as conn:
-        await conn.execute('''DROP TABLE customers, transactions CASCADE;
+        await pool.execute('''DROP TABLE customers, transactions CASCADE;
                               DROP PROCEDURE do_transaction;
                               DROP PROCEDURE get_statement;''')
 
