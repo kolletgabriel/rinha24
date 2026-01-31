@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install unzip \
 
 # Using files from the challenge:
 COPY ./user-files/simulations ./gatling/user-files/simulations
+COPY ./gatling.conf ./gatling/conf/gatling.conf
 
 ENTRYPOINT ["gatling/bin/gatling.sh"]
 CMD ["-rm", "local", "-s", "RinhaBackendCrebitosSimulation", "-rd", "Rinha de Backend - 2024/Q1: Crébito"]
