@@ -17,5 +17,11 @@ RUN apt-get update && apt-get install unzip \
 COPY ./user-files/simulations ./gatling/user-files/simulations
 COPY ./gatling.conf ./gatling/conf/gatling.conf
 
+RUN groupadd gatling \
+    && useradd --create-home -g gatling gatling \
+    && chown -R 1000:1000 /opt
+
+USER gatling
+
 ENTRYPOINT ["gatling/bin/gatling.sh"]
 CMD ["-rm", "local", "-s", "RinhaBackendCrebitosSimulation", "-rd", "Rinha de Backend - 2024/Q1: Crébito"]
