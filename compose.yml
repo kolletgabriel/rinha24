@@ -16,8 +16,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: '170MB'
+          cpus: '0.3'
+          memory: '120MB'
 
   api2:
     <<: *api
@@ -40,8 +40,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: '200MB'
+          cpus: '0.7'
+          memory: '300MB'
 
   lb:
     image: nginx:1.29-trixie
@@ -57,5 +57,5 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.1'
+          cpus: '0.2'
           memory: '10MB'
