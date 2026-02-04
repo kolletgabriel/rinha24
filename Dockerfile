@@ -33,4 +33,4 @@ COPY --from=builder --chown=rinha:rinha /app /app
 
 USER rinha
 
-CMD ["uvicorn", "rinha24.main:app"]
+CMD ["uvicorn", "--no-access-log", "rinha24.main:app"]
