@@ -15,6 +15,9 @@ CREATE TABLE transactions (
 );
 
 
+CREATE INDEX idx_customer_id ON transactions (customer_id);
+
+
 INSERT INTO customers (overdraft_limit) VALUES
     (1000 * 100),
     (800 * 100),
