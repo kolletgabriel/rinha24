@@ -124,5 +124,16 @@ This isn't, of course, good practice in real production systems! But, given the 
 
 ### How to Run it
 
+To simply run the project, the only requirement is **Docker Compose**. To run the scripts, however, you'll need **Bash, cURL and Python3**.
+
 1. Run the script `scripts/start-benchmark.sh`. It'll set up the `compose` stack and run the Gatling container to perform the tests, placing the results under `benchmarks/results`;
 2. Run the script `scripts/calculate-payment.py`. It'll check the reports for nonconformities with the SLA and calculate the final payment. By default, the script finds the last simulation that ran, but any directory containing report files from previous simulations can be passed as an argument.
+
+Now, if you **don't** have Bash on your system, run from the project's root directory:
+
+1. `docker build -t gatling benchmarks/` to build the image for the Gatling container;
+2. `docker compose up -d` to set up the service;
+3. `docker run --rm --name gatling -v benchmarks/results:/opt/gatling/results` to set up the Gatling container and start the benchmark;
+4. `python scripts/calculate-payment.py` if you want to see the results for the challenge.
+
+You can open `benchmarks/results/<simulation-ran>/index.html` with your browser after the load test finnishes to visualize the Gatling report for that given test round.
