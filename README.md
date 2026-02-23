@@ -44,7 +44,7 @@ Here's an example of a valid request body:
 
 A `POST` request on `/customers/5/transaction` with the body above would **add** 10000 cents on customer 5's balance. If `"type"` was `"d"`, the request would instead **subtract** the amount from the balance, but only if the resulting value stayed under the customer's `overdraft_limit`.
 
-A successful transaction returns the HTTP status `200 OK`, and the response body contains the `overdraft_limit` and the balance after the transaction. Any failed transaction returns `422 UNPROCESSABLE CONTENT` with no response body.
+A successful transaction returns the HTTP status `200 OK`, and the response body contains the `overdraft_limit` and the balance after the transaction. Any failed transaction returns `422 UNPROCESSABLE CONTENT` with no response body. Calling this endpoint for a nonexistent `<id>` will cause the service to return `404 NOT FOUND` with no response body.
 
 #### `GET /customers/<id>/statement`
 
@@ -82,7 +82,7 @@ Here's an example of a valid statement, for a customer with 2 registered transac
 }
 ```
 
-The status code for the response is `200 OK`.
+The status code for the response is `200 OK`. Calling this endpoint for a nonexistent `<id>` will cause the service to return `404 NOT FOUND` with no response body.
 
 ### Restrictions
 
